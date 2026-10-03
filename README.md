@@ -1,5 +1,24 @@
 # SmartCart — Customer Segmentation & Analytics Platform
 
+SmartCart segments customers using PCA and K-Means clustering. Upload
+a customer CSV and it groups customers into behavioural segments —
+income, spending, age, household — then shows each group's profile
+through an interactive dashboard. It can also classify a single
+customer on the spot from a short form, without needing a CSV.
+
+## Features
+
+- **Batch upload** — upload a customer CSV, get back a segmented
+  dashboard (cluster sizes, spending by segment, a PCA scatter map)
+  plus a downloadable `smartcart_segmented.csv` with cluster
+  assignments added.
+- **Single customer check** — enter one customer's details directly
+  and see which segment they fall into, without preparing a CSV.
+- **Resilient CSV handling** — required columns (income, spend,
+  dates) fail with a specific error message; optional columns
+  (education, marital status) fall back to sensible defaults instead
+  of rejecting the whole file.
+
 ## Folder structure
 
 ```text
@@ -67,6 +86,9 @@ returns `smartcart_segmented.csv` with cluster/segment assignments.
 ## Deployment
 
 The included `Procfile` is ready for platforms that support Gunicorn.
-Do not commit the generated `.pkl` model files if you intend to train
-them during deployment; otherwise remove their ignore rule and commit
-the trained artifacts.
+
+The trained model artifacts in `models/*.pkl` are committed to this
+repo, so the deployed app loads them directly at startup — there is
+no retraining step on deploy. If you retrain locally with
+`train_model.py`, re-commit the updated `.pkl` files for the
+deployed version to pick up the changes.
