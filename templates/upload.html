@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  :root {
+    --upload-accent: #1f2c32;  
+  }
+
+  .upload-page {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+  }
+
+  .upload-box {
+    width: min(560px, 100%);
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: var(--r);
+    padding: 48px 44px;
+    text-align: center;
+  }
+
+  .upload-mark {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 24px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: var(--upload-accent);
+    color: #fff;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .upload-box h1 {
+    font-size: 30px;
+    margin: 0;
+  }
+
+  .upload-box > p {
+    margin: 10px 0 32px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .file-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 88px;
+    border: 1.5px dashed var(--rule);
+    border-radius: var(--r);
+    background: var(--paper);
+    cursor: pointer;
+    color: var(--body);
+    font-size: 14px;
+    font-weight: 500;
+    transition: border-color .15s, background .15s;
+  }
+  .file-picker:hover {
+    border-color: var(--upload-accent);
+    background: #fff;
+  }
+  .file-picker input { display: none; }
+
+  .upload-box .btn-solid {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    border: 0;
+    cursor: pointer;
+    font-size: 15px;
+    padding: 14px 22px;
+  }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .back-link:hover { color: var(--ink); }
+</style>
+
+<div class="upload-page">
+  <div class="upload-box">
+    <div class="upload-mark">+</div>
+
+    <h1>Add customer data</h1>
+    <p>Upload your CSV file.</p>
+
+    <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+      <label class="file-picker">
+        <span id="file-name">Choose CSV file</span>
+        <input type="file" name="file" accept=".csv" required
+               onchange="document.getElementById('file-name').textContent = this.files[0]?.name || 'Choose CSV file'">
+      </label>
+
+      <button type="submit" class="btn btn-solid">Analyze</button>
+    </form>
+
+    <a href="/" class="back-link">&larr; Back</a>
+  </div>
+</div>
+{% endblock %}

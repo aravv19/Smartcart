@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="check-head">
+  <h1>Check a customer</h1>
+  <p>Fill in what you know about one customer and SmartCart will tell you
+     which segment they fall into.</p>
+</div>
+
+<form class="check-form" action="/analyze" method="POST">
+  <div class="check-cols">
+
+    <!-- ------------------------------------------------ inputs -->
+    <div class="check-fields">
+
+      <fieldset class="group">
+        <legend>Who they are</legend>
+
+        <div class="fields">
+          <p class="field">
+            <label for="Income">Yearly income</label>
+            <span class="input-money">
+              <input id="Income" type="number" name="Income" min="0" step="100"
+                     placeholder="50,000" required>
+            </span>
+          </p>
+
+          <p class="field">
+            <label for="Year_Birth">Year of birth</label>
+            <input id="Year_Birth" type="number" name="Year_Birth"
+                   min="1900" max="2020" placeholder="1985" required>
+            <span class="field-note" id="ageNote">Age appears once you fill this in.</span>
+          </p>
+
+          <p class="field">
+            <label for="Dt_Customer">Customer since</label>
+            <input id="Dt_Customer" type="date" name="Dt_Customer" required>
+          </p>
+
+          <p class="field">
+            <label for="Marital_Status">Marital status</label>
+            <select id="Marital_Status" name="Marital_Status" required>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Together">Living together</option>
+              <option value="Divorced">Divorced</option>
+              <option value="Widow">Widowed</option>
+            </select>
+          </p>
+
+          <p class="field field-wide">
+            <label for="Education">Highest education</label>
+            <select id="Education" name="Education" required>
+              <option value="Basic">Basic</option>
+              <option value="2n Cycle">2n Cycle</option>
+              <option value="Graduation" selected>Graduation</option>
+              <option value="Master">Master's</option>
+              <option value="PhD">PhD</option>
+            </select>
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>Household</legend>
+
+        <div class="fields">
+          <p class="field">
+            <label for="Kidhome">Children at home</label>
+            <input id="Kidhome" class="js-kids" type="number" name="Kidhome"
+                   value="0" min="0" max="10" required>
+          </p>
+          <p class="field">
+            <label for="Teenhome">Teenagers at home</label>
+            <input id="Teenhome" class="js-kids" type="number" name="Teenhome"
+                   value="0" min="0" max="10" required>
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset class="group">
+        <legend>What they spend</legend>
+        <p class="group-note">Amount spent in each category over the last two years.
+           Leave a category at zero if they never buy it.</p>
+
+        <ul class="spend-list">
+          <li>
+            <label for="MntWines">Wine</label>
+            <span class="input-money">
+              <input id="MntWines" class="js-spend" type="number" name="MntWines"
+                     value="0" min="0" required>
+            </span>
+          </li>
+          <li>
+            <label for="MntFruits">Fruit</label>
+            <span class="input-money">
+              <input id="MntFruits" class="js-spend" type="number" name="MntFruits"
+                     value="0" min="0" required>
+            </span>
+          </li>
+          <li>
+            <label for="MntMeatProducts">Meat</label>
+            <span class="input-money">
+              <input id="MntMeatProducts" class="js-spend" type="number" name="MntMeatProducts"
+                     value="0" min="0" required>
+            </span>
+          </li>
+          <li>
+            <label for="MntFishProducts">Fish</label>
+            <span class="input-money">
+              <input id="MntFishProducts" class="js-spend" type="number" name="MntFishProducts"
+                     value="0" min="0" required>
+            </span>
+          </li>
+          <li>
+            <label for="MntSweetProducts">Sweets</label>
+            <span class="input-money">
+              <input id="MntSweetProducts" class="js-spend" type="number" name="MntSweetProducts"
+                     value="0" min="0" required>
+            </span>
+          </li>
+          <li>
+            <label for="MntGoldProds">Gold products</label>
+            <span class="input-money">
+              <input id="MntGoldProds" class="js-spend" type="number" name="MntGoldProds"
+                     value="0" min="0" required>
+            </span>
+          </li>
+        </ul>
+      </fieldset>
+    </div>
+
+    <!-- ------------------------------------------------ summary -->
+    <aside class="check-summary">
+      <div class="summary-card">
+        <h2>This customer</h2>
+
+        <dl class="summary-list">
+          <div>
+            <dt>Age</dt>
+            <dd id="sumAge">&mdash;</dd>
+          </div>
+          <div>
+            <dt>Household</dt>
+            <dd id="sumHouse">2 adults</dd>
+          </div>
+          <div>
+            <dt>Total spend</dt>
+            <dd id="sumSpend">$0</dd>
+          </div>
+        </dl>
+
+        <div class="summary-split" id="splitWrap" hidden>
+          <span class="summary-sub">Where it goes</span>
+          <div class="split-bar" id="splitBar" aria-hidden="true"></div>
+          <ul class="split-legend" id="splitLegend"></ul>
+        </div>
+
+        <button class="btn btn-solid btn-block" type="submit">Find their segment</button>
+        <a class="summary-cancel" href="/">Cancel</a>
+      </div>
+    </aside>
+
+  </div>
+</form>
+
+<script>
+(function () {
+  const palette = ['#2f6f8f', '#b0475f', '#3f7a52', '#7b5ea7', '#c9762c', '#4a5d78'];
+  const spendInputs = Array.from(document.querySelectorAll('.js-spend'));
+  const kidInputs   = Array.from(document.querySelectorAll('.js-kids'));
+  const birth       = document.getElementById('Year_Birth');
+
+  const sumAge   = document.getElementById('sumAge');
+  const sumHouse = document.getElementById('sumHouse');
+  const sumSpend = document.getElementById('sumSpend');
+  const ageNote  = document.getElementById('ageNote');
+  const wrap     = document.getElementById('splitWrap');
+  const bar      = document.getElementById('splitBar');
+  const legend   = document.getElementById('splitLegend');
+
+  const money = n => '$' + Number(n).toLocaleString();
+  const val   = el => Math.max(0, Number(el.value) || 0);
+
+  function update() {
+    const year = Number(birth.value);
+    if (year >= 1900 && year <= new Date().getFullYear()) {
+      const age = new Date().getFullYear() - year;
+      sumAge.textContent = age;
+      ageNote.textContent = 'That makes them ' + age + ' years old.';
+    } else {
+      sumAge.textContent = '\u2014';
+      ageNote.textContent = 'Age appears once you fill this in.';
+    }
+
+    const kids = kidInputs.reduce((t, el) => t + val(el), 0);
+    sumHouse.textContent = kids === 0 ? '2 adults'
+      : '2 adults, ' + kids + (kids === 1 ? ' child' : ' children');
+
+    const parts = spendInputs.map((el, i) => ({
+      name: el.parentElement.parentElement.querySelector('label').textContent,
+      amount: val(el),
+      color: palette[i % palette.length]
+    }));
+    const total = parts.reduce((t, p) => t + p.amount, 0);
+    sumSpend.textContent = money(total);
+
+    if (total === 0) { wrap.hidden = true; bar.innerHTML = ''; legend.innerHTML = ''; return; }
+    wrap.hidden = false;
+
+    const shown = parts.filter(p => p.amount > 0).sort((a, b) => b.amount - a.amount);
+    bar.innerHTML = '';
+    legend.innerHTML = '';
+    shown.forEach(p => {
+      const seg = document.createElement('span');
+      seg.style.width = (p.amount / total * 100) + '%';
+      seg.style.background = p.color;
+      bar.appendChild(seg);
+
+      const li = document.createElement('li');
+      li.innerHTML = '<span class="split-dot" style="background:' + p.color + '"></span>'
+                   + '<span>' + p.name + '</span>'
+                   + '<b>' + Math.round(p.amount / total * 100) + '%</b>';
+      legend.appendChild(li);
+    });
+  }
+
+  [].concat(spendInputs, kidInputs, [birth])
+    .forEach(el => el.addEventListener('input', update));
+  update();
+})();
+</script>
+
+{% endblock %}

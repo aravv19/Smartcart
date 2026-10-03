@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="error-card">
+  <span class="error-tag">Upload failed</span>
+  <h1>Something went wrong</h1>
+  <p>{{ error }}</p>
+  <a class="btn btn-solid" href="/">Back to Dashboard</a>
+</div>
+{% endblock %}

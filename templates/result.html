@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="result-page">
+
+  <div class="result-head">
+    <span class="result-head-label">Analysis complete</span>
+    <a href="/analyze" class="btn btn-quiet">Check another</a>
+  </div>
+
+  <div class="result-split">
+
+    <!-- ---------------------------------------------- the result -->
+    <section class="result-panel s{{ result.cluster % 6 }}">
+      <span class="result-watermark" aria-hidden="true">{{ result.cluster }}</span>
+
+      <div class="result-panel-inner">
+        <span class="result-pill">Cluster {{ result.cluster }}</span>
+
+        <h1>{{ result.label }}</h1>
+
+        <p>Placed here based on income, age and how spending splits
+           across categories, run through the same PCA and K-Means
+           model used on your uploaded file.</p>
+
+        <dl class="result-stats">
+          <div>
+            <dt>Income</dt>
+            <dd>${{ "{:,.0f}".format(result.income) }}</dd>
+          </div>
+          <div>
+            <dt>Total spend</dt>
+            <dd>${{ "{:,.0f}".format(result.spending) }}</dd>
+          </div>
+          <div>
+            <dt>Age</dt>
+            <dd>{{ result.age }}</dd>
+          </div>
+        </dl>
+
+        <a href="/analyze" class="btn btn-on-dark">Check another customer</a>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------- the map -->
+    <section class="result-map-panel">
+      <div class="result-map-head">
+        <h2>Where they sit</h2>
+        <p>Your uploaded customers, with this one marked.</p>
+      </div>
+
+      <div class="result-map">
+        <svg viewBox="0 0 480 340" preserveAspectRatio="xMidYMid meet"
+             role="img" aria-label="Scatter plot of customers with this customer highlighted">
+          <line class="ax" x1="38" y1="300" x2="462" y2="300"/>
+          <line class="ax" x1="38" y1="14"  x2="38"  y2="300"/>
+          <text class="axlabel" x="462" y="320" text-anchor="end">Component 1</text>
+          <text class="axlabel" x="26" y="18" text-anchor="end" transform="rotate(-90 26 18)">Component 2</text>
+
+          <g class="field-dots" aria-hidden="true">
+            <circle cx="96"  cy="130" r="4"/><circle cx="120" cy="104" r="4"/><circle cx="84"  cy="156" r="4"/>
+            <circle cx="150" cy="142" r="4"/><circle cx="108" cy="84"  r="4"/><circle cx="140" cy="168" r="4"/>
+            <circle cx="220" cy="110" r="4"/><circle cx="248" cy="86"  r="4"/><circle cx="210" cy="156" r="4"/>
+            <circle cx="272" cy="132" r="4"/><circle cx="300" cy="98"  r="4"/><circle cx="330" cy="166" r="4"/>
+            <circle cx="360" cy="112" r="4"/><circle cx="392" cy="90"  r="4"/><circle cx="410" cy="144" r="4"/>
+            <circle cx="130" cy="222" r="4"/><circle cx="170" cy="244" r="4"/><circle cx="240" cy="232" r="4"/>
+            <circle cx="290" cy="256" r="4"/><circle cx="340" cy="222" r="4"/><circle cx="380" cy="254" r="4"/>
+            <circle cx="200" cy="64"  r="4"/><circle cx="60"  cy="220" r="4"/><circle cx="430" cy="210" r="4"/>
+            <circle cx="70"  cy="90"  r="4"/><circle cx="450" cy="130" r="4"/><circle cx="180" cy="280" r="4"/>
+          </g>
+
+          <g class="result-mark s{{ result.cluster % 6 }}"
+             transform="translate({{ result.pca1_x|default(240) }},{{ result.pca2_y|default(160) }})">
+            <circle class="result-mark-halo" r="24"/>
+            <circle class="result-mark-ring" r="13"/>
+            <circle class="result-mark-dot" r="5.5"/>
+          </g>
+        </svg>
+      </div>
+
+      <dl class="pc-values">
+        <div><dt>PC1</dt><dd>{{ result.pca1 }}</dd></div>
+        <div><dt>PC2</dt><dd>{{ result.pca2 }}</dd></div>
+      </dl>
+    </section>
+
+  </div>
+</div>
+
+{% endblock %}

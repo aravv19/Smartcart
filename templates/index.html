@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if not data.uploaded %}
+<!-- ============================ LANDING ============================ -->
+
+<div class="intro">
+  <div class="intro-copy">
+    <h1>See who your<br>customers<br>actually are.</h1>
+    <p>Upload a customer CSV. SmartCart finds the groups of similar
+       customers hiding in it, then shows you what each group looks
+       like &mdash; how much they earn, how much they spend, how old they are.</p>
+    <div class="intro-actions">
+      <a class="btn btn-solid btn-lg" href="/upload">Upload a CSV</a>
+      <a class="btn btn-quiet btn-lg" href="/analyze">Check a single customer</a>
+    </div>
+    <p class="intro-note">Works with the columns you already have. Nothing leaves your machine.</p>
+  </div>
+
+  <figure class="intro-plot">
+    <svg viewBox="0 0 480 400" role="img" aria-label="Scatter plot of customers arranged into four coloured groups along two principal components">
+      <line class="ax" x1="46" y1="356" x2="462" y2="356"/>
+      <line class="ax" x1="46" y1="20"  x2="46"  y2="356"/>
+      <g class="tick">
+        <line x1="46" y1="272" x2="462" y2="272"/>
+        <line x1="46" y1="188" x2="462" y2="188"/>
+        <line x1="46" y1="104" x2="462" y2="104"/>
+      </g>
+      <text class="axlabel" x="462" y="380" text-anchor="end">Component 1</text>
+      <text class="axlabel" x="34" y="24" text-anchor="end" transform="rotate(-90 34 24)">Component 2</text>
+
+      <g class="pt c0">
+        <circle cx="128" cy="118" r="5"/><circle cx="146" cy="96" r="5"/><circle cx="108" cy="138" r="5"/>
+        <circle cx="160" cy="130" r="5"/><circle cx="118" cy="82" r="5"/><circle cx="142" cy="146" r="5"/>
+        <circle cx="96"  cy="108" r="5"/><circle cx="170" cy="104" r="5"/><circle cx="132" cy="64" r="5"/>
+        <circle cx="86"  cy="150" r="5"/><circle cx="156" cy="72" r="5"/><circle cx="112" cy="166" r="5"/>
+        <circle cx="178" cy="138" r="5"/><circle cx="102" cy="92" r="5"/>
+      </g>
+      <g class="pt c1">
+        <circle cx="344" cy="96"  r="5"/><circle cx="366" cy="120" r="5"/><circle cx="322" cy="78"  r="5"/>
+        <circle cx="386" cy="98"  r="5"/><circle cx="356" cy="62"  r="5"/><circle cx="330" cy="126" r="5"/>
+        <circle cx="404" cy="72"  r="5"/><circle cx="376" cy="142" r="5"/><circle cx="310" cy="104" r="5"/>
+        <circle cx="398" cy="128" r="5"/><circle cx="352" cy="140" r="5"/><circle cx="420" cy="104" r="5"/>
+        <circle cx="338" cy="48"  r="5"/>
+      </g>
+      <g class="pt c2">
+        <circle cx="118" cy="268" r="5"/><circle cx="142" cy="290" r="5"/><circle cx="96"  cy="250" r="5"/>
+        <circle cx="160" cy="262" r="5"/><circle cx="126" cy="312" r="5"/><circle cx="104" cy="292" r="5"/>
+        <circle cx="172" cy="296" r="5"/><circle cx="84"  cy="274" r="5"/><circle cx="148" cy="238" r="5"/>
+        <circle cx="132" cy="332" r="5"/><circle cx="180" cy="326" r="5"/><circle cx="110" cy="226" r="5"/>
+      </g>
+      <g class="pt c3">
+        <circle cx="352" cy="268" r="5"/><circle cx="376" cy="288" r="5"/><circle cx="330" cy="252" r="5"/>
+        <circle cx="396" cy="262" r="5"/><circle cx="344" cy="306" r="5"/><circle cx="312" cy="284" r="5"/>
+        <circle cx="386" cy="312" r="5"/><circle cx="414" cy="286" r="5"/><circle cx="360" cy="236" r="5"/>
+        <circle cx="322" cy="322" r="5"/><circle cx="404" cy="236" r="5"/>
+      </g>
+    </svg>
+    <figcaption>Four groups found in a 2,240-customer file.</figcaption>
+  </figure>
+</div>
+
+<section class="how" id="how">
+  <h2>How it works</h2>
+  <ol class="steps">
+    <li><span class="step-n">1</span><b>Upload your CSV</b><p>Any customer export with spending, income and demographic columns.</p></li>
+    <li><span class="step-n">2</span><b>The model groups customers</b><p>Features are scaled, reduced with PCA, then grouped with K-Means.</p></li>
+    <li><span class="step-n">3</span><b>Read the segments</b><p>Charts, a profile for each group, and a CSV you can take away.</p></li>
+  </ol>
+</section>
+
+{% else %}
+<!-- ============================ RESULTS ============================ -->
+
+<div class="results">
+
+  <div class="results-head">
+    <div>
+      <h1>Your customer overview</h1>
+      <p>Based on the file you uploaded.</p>
+    </div>
+    <div class="head-actions" style="display:flex;gap:9px;">
+      <a class="btn btn-quiet" href="/upload">Upload a different CSV</a>
+      <a class="btn btn-quiet" href="/reset">Clear uploaded data</a>
+      <a class="btn btn-solid" href="/download-segmented">Download results</a>
+
+    </div>
+  </div>
+
+  <dl class="figures">
+    <div>
+      <dt>Customers</dt>
+      <dd>{{ "{:,}".format(data.total_customers) }}</dd>
+      <small>rows in your file</small>
+    </div>
+    <div>
+      <dt>Segments</dt>
+      <dd>{{ data.num_clusters }}</dd>
+      <small>groups the model found</small>
+    </div>
+    <div>
+      <dt>Average spending</dt>
+      <dd>${{ "{:,.0f}".format(data.avg_spending) }}</dd>
+      <small>per customer</small>
+    </div>
+    <div>
+      <dt>Average income</dt>
+      <dd>${{ "{:,.0f}".format(data.avg_income) }}</dd>
+      <small>per customer</small>
+    </div>
+  </dl>
+
+  <section class="plot-row">
+    <article class="plot plot-main">
+      <h2>Customer map</h2>
+      <p class="plot-sub">Each dot is one customer. Dots sit close together when their behaviour is similar.</p>
+      <div class="canvas-tall"><canvas id="pcaChart" aria-label="Scatter plot of customers coloured by segment"></canvas></div>
+    </article>
+
+    <article class="plot">
+      <h2>Spending by segment</h2>
+      <p class="plot-sub">Average total spend.</p>
+      <div class="canvas-short"><canvas id="spendChart" aria-label="Bar chart of average spending per segment"></canvas></div>
+    </article>
+  </section>
+
+  <section class="profiles">
+    <h2>What each segment looks like</h2>
+    <div class="table-scroll">
+      <table class="seg-table">
+        <thead>
+          <tr>
+            <th scope="col">Segment</th>
+            <th scope="col" class="num">Customers</th>
+            <th scope="col">Share</th>
+            <th scope="col" class="num">Avg income</th>
+            <th scope="col" class="num">Avg spend</th>
+            <th scope="col" class="num">Avg age</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in data.profiles %}
+          <tr>
+            <th scope="row">
+              <span class="swatch s{{ loop.index0 % 6 }}" aria-hidden="true"></span>
+              <span class="seg-name">{{ p.label }}</span>
+              <span class="seg-id">Cluster {{ p.cluster }}</span>
+            </th>
+            <td class="num">{{ "{:,}".format(p.customers) }}</td>
+            <td class="share">
+              <span class="share-track"><span class="share-fill s{{ loop.index0 % 6 }}" style="width:{{ p.share }}%"></span></span>
+              <span class="share-val">{{ p.share }}%</span>
+            </td>
+            <td class="num">${{ "{:,.0f}".format(p.avg_income) }}</td>
+            <td class="num">${{ "{:,.0f}".format(p.avg_spending) }}</td>
+            <td class="num">{{ p.avg_age }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ids      = {{ data.cluster_ids|tojson }};
+const profiles = {{ data.profiles|tojson }};
+const points   = {{ data.pca_points|tojson }};
+
+const palette = ['#2f6f8f', '#b0475f', '#3f7a52', '#7b5ea7', '#c9762c', '#4a5d78'];
+const ink = '#16202c', muted = '#6b7684', rule = '#dfe4ea';
+
+Chart.defaults.font.family = "'IBM Plex Sans', system-ui, sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = muted;
+
+new Chart(document.getElementById('pcaChart'), {
+  type: 'scatter',
+  data: {
+    datasets: ids.map((id, i) => ({
+      label: (profiles[i] && profiles[i].label) ? profiles[i].label : 'Cluster ' + id,
+      data: points.filter(p => p.cluster === id).map(p => ({x: p.x, y: p.y})),
+      backgroundColor: palette[i % palette.length],
+      pointRadius: 3.5,
+      pointHoverRadius: 6
+    }))
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      legend: {position: 'bottom', labels: {usePointStyle: true, pointStyle: 'circle', boxWidth: 7, padding: 18, color: ink}},
+      tooltip: {backgroundColor: ink, padding: 10, cornerRadius: 4, displayColors: false}
+    },
+    scales: {
+      x: {title: {display: true, text: 'Component 1', color: muted}, grid: {color: rule}, border: {color: rule}, ticks: {maxTicksLimit: 7}},
+      y: {title: {display: true, text: 'Component 2', color: muted}, grid: {color: rule}, border: {color: rule}, ticks: {maxTicksLimit: 6}}
+    }
+  }
+});
+
+new Chart(document.getElementById('spendChart'), {
+  type: 'bar',
+  data: {
+    labels: profiles.map(p => p.label),
+    datasets: [{
+      data: profiles.map(p => p.avg_spending),
+      backgroundColor: profiles.map((p, i) => palette[i % palette.length]),
+      borderRadius: 2,
+      barThickness: 18
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: false,
+    plugins: {
+      legend: {display: false},
+      tooltip: {backgroundColor: ink, padding: 10, cornerRadius: 4, displayColors: false,
+                callbacks: {label: c => '$' + Number(c.raw).toLocaleString()}}
+    },
+    scales: {
+      x: {grid: {color: rule}, border: {display: false}, ticks: {callback: v => '$' + Number(v).toLocaleString(), maxTicksLimit: 5}},
+      y: {grid: {display: false}, border: {color: rule}, ticks: {color: ink}}
+    }
+  }
+});
+</script>
+{% endif %}
+
+{% endblock %}
